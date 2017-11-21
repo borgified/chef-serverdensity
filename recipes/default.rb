@@ -20,10 +20,21 @@ case node["platform"]
   when 'debian', 'ubuntu'
     include_recipe 'apt'
 
+    case node['lsb']['codename'].downcase
+      when 'artful', 'yakkety', 'xenial', 'zesty'
+        node.run_state['repo_dist'] = 'xenial'
+      when 'trusty', 'utopic', 'vivid', 'wily'
+        node.run_state['repo_dist'] = 'trusty'
+      when 'precise', 'quantal', 'raring', 'saucy'
+        node.run_state['repo_dist'] = 'all'
+      when 'wheezy', 'jessie', 'stretch'
+        node.run_state['repo_dist'] = node['lsb']['codename'].downcase
+    end
+
     apt_repository 'serverdensity' do
       key 'https://archive.serverdensity.com/sd-packaging-public.key'
-      uri 'https://archive.serverdensity.com/ubuntu/'
-      distribution 'all'
+      uri "https://archive.serverdensity.com/#{node['platform']}/"
+      distribution node.run_state['repo_dist']
       components ['main']
       action :add
     end

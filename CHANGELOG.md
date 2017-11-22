@@ -1,5 +1,9 @@
 ChangeLog for chef-serverdensity
 ================================
+3.0.8 (22-11-2017)
+------------------
+- Added support for new deb repositories
+
 3.0.7 (10-01-2017)
 ------------------
 - Added support for Couchbase plugin

@@ -44,7 +44,43 @@ case node["platform"]
     end
 
   when 'centos', 'redhat', 'amazon', 'scientific', 'oracle'
+    major = node['platform_version'].to_i
+    if major == 6
+      if node[:kernel][:machine] == "i686"
+         rpm_arch = "i386"
+      else
+         rpm_arch = node[:kernel][:machine]
+      end
+      remote_file "#{Chef::Config[:file_cache_path]}/epel-release-latest.noarch.rpm" do
+        source "https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
+        notifies :install, "rpm_package[epel-release]", :immediately
+        retries 5 # We may be redirected to a FTP URL, CHEF-1031.
+      end
 
+      rpm_package "epel-release" do
+        source "#{Chef::Config[:file_cache_path]}/epel-release-latest.noarch.rpm"
+        only_if {::File.exists?("#{Chef::Config[:file_cache_path]}/epel-release-latest.noarch.rpm")}
+        action :nothing
+      end
+
+      if node["platform"] == "centos"
+        ius_package = node["platform"]
+      else
+        ius_package = "rhel"
+      end
+
+      remote_file "#{Chef::Config[:file_cache_path]}/ius-release.rpm" do
+        source "https://#{ius_package}6.iuscommunity.org/ius-release.rpm"
+        notifies :install, "rpm_package[ius-release]", :immediately
+        retries 5 # We may be redirected to a FTP URL, CHEF-1031.
+      end
+
+      rpm_package "ius-release" do
+        source "#{Chef::Config[:file_cache_path]}/ius-release.rpm"
+        only_if {::File.exists?("#{Chef::Config[:file_cache_path]}/ius-release.rpm")}
+        action :nothing
+      end
+    end
     yum_repository 'serverdensity' do
       description 'Server Density sd-agent'
       baseurl 'https://archive.serverdensity.com/el/$releasever'

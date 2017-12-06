@@ -32,11 +32,19 @@ case node["platform"]
       allow false
     end
 
-  when 'centos', 'redhat', 'amazon', 'scientific', 'oracle'
+  when 'centos', 'redhat', 'scientific', 'oracle'
 
     yum_repository 'serverdensity' do
       description 'Server Density sd-agent'
       baseurl 'https://archive.serverdensity.com/el/$releasever'
+      gpgkey 'https://archive.serverdensity.com/sd-packaging-public.key'
+    end
+
+  when 'amazon'
+
+    yum_repository 'serverdensity' do
+      description 'Server Density sd-agent'
+      baseurl 'https://archive.serverdensity.com/el/6'
       gpgkey 'https://archive.serverdensity.com/sd-packaging-public.key'
     end
 end
